@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 pygame.init()
-
+fart = True
 screen_width = 725
 screen_height = 500
 
