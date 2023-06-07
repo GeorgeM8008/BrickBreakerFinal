@@ -1,5 +1,6 @@
 import pygame
-from pygame.locals import *
+import math
+
 
 pygame.init()
 
@@ -20,48 +21,62 @@ pygame.display.set_icon(icon)
 FPS = 60
 clock = pygame.time.Clock()
 
-red_brick = pygame.image.load('Red_brick.png')
-green_brick = pygame.image.load('Green_brick.png')
-blue_brick = pygame.image.load('Blue_brick .png')
+playerX = 293
+playerY = 460
+player_width = 125
+player_height = 18
 
-playerImg = pygame.image.load('platform.png')
-playerX = 300
-playerY = 400
+class Player:
+    def __init__(self, x, y, width, height, colour):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.colour = colour
 
+    def draw(self, screen):
+        pygame.draw.rect(
+            screen, self.colour, (self.x, self.y, self.width, self.height))
+    def move(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEMOTION:
+               mouse_Pos = pygame.mouse.get_pos()
+               self.x = mouse_Pos[0] - 62
+               player.draw(screen)
 
-def player(x):
-  screen.blit(playerImg, (x, playerY))
+        if self.x <= 55:
+            self.x = 55
+        elif self.x >= 670:
+            self.x = 670
 
 ball_radius = 10
-
 class Ball:
     VEL = 5
-    def __init__(self, x, y, radius, colour):
+
+    def __init__(self, x, y, radius, color):
         self.x = x
         self.y = y
         self.radius = radius
-        self.colour = colour
-        self.rect = Rect(self.x, self.y, ball_radius * 2, ball_radius * 2)
-        self.x_vel = 5
+        self.color = color
+        self.x_vel = 0
         self.y_vel = -self.VEL
 
     def move(self):
         self.x += self.x_vel
         self.y += self.y_vel
+
     def set_vel(self, x_vel, y_vel):
         self.x_vel = x_vel
         self.y_vel = y_vel
-    def draw(self):
-        pygame.draw.circle(screen, self.colour, (self.x, self.y), self.radius)
-    def ball_paddle_collide(self, ):
-        if self.rect.colliderect(player(playerX)):
-            ball.set_vel(ball.x_vel, ball.y_vel * -1)
 
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
 
 
 iballX = screen_width/2 - ball_radius
-iballY = playerY + 31
+iballY = playerY - 10
 ball = Ball(iballX, iballY, ball_radius, (0, 0, 0))
+player = Player(playerX, playerY, player_width, player_height, (0, 0, 0))
 
 def ball_col(ball):
     if ball.x - ball_radius <= 0 or ball.x + ball_radius >= screen_width - 10:
@@ -69,19 +84,31 @@ def ball_col(ball):
     if ball.y + ball.radius >= screen_height or ball.y - ball.radius <= 0:
         ball.set_vel(ball.x_vel, ball.y_vel * -1)
 
+def ball_player_col(ball, player):
+    if not (ball.x <= player.x + player.width and ball.x >= player.x):
+        return
+    if not (ball.y + ball.radius >=player.y):
+        return
 
+    player_center = player.x + player.width/2
+    distance_to_center = ball.x - player_center
 
-        
-     
+    percent_width = distance_to_center / player.width
+    angle = percent_width * 90
+    angle_radians = math.radians(angle)
 
+    x_vel = math.sin(angle_radians) * ball.VEL
+    y_vel = math.cos(angle_radians) * ball.VEL * -1
+
+    ball.set_vel(x_vel, y_vel)
        
        
-player(playerX)
+
 running = False
 while running == False:
     screen.fill((245, 245, 220))
-    player(playerX)
-    ball.draw()
+    player.draw(screen)
+    ball.draw(screen)
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             running = True
@@ -90,24 +117,14 @@ while running == False:
   
 while running:
     screen.fill((245, 245, 220))
-    player(playerX - 55)
+    player.draw(screen)
     ball.move()
+    player.move()
     ball_col(ball)
-    ball.ball_paddle_collide()
-    all.draw()
-  
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEMOTION:
-            mouse_Pos = pygame.mouse.get_pos()
-            playerX = mouse_Pos[0]
-
-    if playerX <= 55:
-        playerX = 55
-    elif playerX >= 670:
-        playerX = 670
+    ball_player_col(ball, player)
+    ball.draw(screen)
   
     clock.tick(FPS)
-  
 
     pygame.display.update()
 pygame.quit()
