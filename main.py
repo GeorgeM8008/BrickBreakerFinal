@@ -108,7 +108,7 @@ ball = Ball(Calc_ball.iballX, Calc_ball.iballY, Calc_ball.ball_radius, (0, 0, 0)
 player = Player(playerX, playerY, player_width, player_height, (0, 0, 0))
 
 #The bricks
-bricks = generate_bricks(3, 10)
+
 
 #Resets the ball after it hits the floor
 def reset():
@@ -169,7 +169,7 @@ def generate_bricks(rows, cols):
                           gap * row, brick_width, brick_height, 2, [(0, 0, 255), (255, 255, 0)])
             bricks.append(brick)
     return bricks
-
+bricks = generate_bricks(3, 10)
 '''Before running is true, it displays all the components frozen until
 the player clicks their mouse'''
 while running == False:
