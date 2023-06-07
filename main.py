@@ -6,6 +6,8 @@ import Calc_ball
 #Initializes all imported pygame modules
 pygame.init()
 
+LIVES_FONT = pygame.font.SysFont("ariel.ttf", 42)
+lives = 3
 
 screen_width = 700
 screen_height = 500
@@ -90,11 +92,28 @@ class Brick:
 ball = Ball(Calc_ball.iballX, Calc_ball.iballY, Calc_ball.ball_radius, (0, 0, 0))
 player = Player(playerX, playerY, player_width, player_height, (0, 0, 0))
 
+def reset():
+    global lives, running
+    pygame.time.delay(500)
+    lives -= 1
+    ball.x = screen_width/2 - 10
+    ball.y = playerY - 10
+    ball.set_vel(0, ball.VEL * -1)
+
+def display_text(text):
+    text_render = LIVES_FONT.render(text, 1, "red")
+    screen.blit(text_render, (screen_width/2 - text_render.get_width() /
+                               2, screen_height/2 - text_render.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(3000)
 def ball_col(ball):
+    global running, lives
     if ball.x - Calc_ball.ball_radius <= 0 or ball.x + Calc_ball.ball_radius >= screen_width - 10:
         ball.set_vel(ball.x_vel * -1, ball.y_vel)
-    if ball.y + ball.radius >= screen_height or ball.y - ball.radius <= 0:
+    if ball.y - ball.radius <= 0:
         ball.set_vel(ball.x_vel, ball.y_vel * -1)
+    if ball.y + ball.radius >= 500:
+        reset()
 
 def ball_player_col(ball, player):
     if not (ball.x <= player.x + player.width and ball.x >= player.x):
@@ -131,7 +150,6 @@ ball = Ball(Calc_ball.iballX, Calc_ball.iballY, Calc_ball.ball_radius, (0, 0, 0)
 player = Player(playerX, playerY, player_width, player_height, (0, 0, 0))
 bricks = generate_bricks(3, 10)
 
-running = False
 while running == False:
     screen.fill((245, 245, 220))
   
@@ -140,6 +158,10 @@ while running == False:
   
     for brick in bricks:
         brick.draw(screen)
+
+    lives_text = LIVES_FONT.render(f"Lives: {lives}", 1, "black")
+    screen.blit(lives_text, (10, screen_height - lives_text.get_height() - 9))
+
       
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -147,7 +169,7 @@ while running == False:
     clock.tick(FPS)
     pygame.display.update()
   
-while running:
+while running == True:
     screen.fill((245, 245, 220))
     player.draw(screen)
     ball.move()
@@ -157,15 +179,28 @@ while running:
     ball.draw(screen)
     for brick in bricks:
         brick.draw(screen)
+    lives_text = LIVES_FONT.render(f"Lives: {lives}", 1, "black")
+    screen.blit(lives_text, (10, screen_height - lives_text.get_height() - 9))
 
     for brick in bricks[:]:
         brick.collide(ball)
 
         if brick.health <= 0:
             bricks.remove(brick)
-            
-  
+    if lives <= 0:
+        bricks = generate_bricks(3, 10)
+        lives = 3
+        reset()
+        display_text("You Lost!")
+
+    if len(bricks) == 0:
+        bricks = generate_bricks(3, 10)
+        lives = 3
+        reset()
+        display_text("You Won!")
+
     clock.tick(FPS)
+
 
     pygame.display.update()
 pygame.quit()
